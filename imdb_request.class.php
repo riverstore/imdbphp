@@ -13,8 +13,8 @@
 
 if ( $PEAR ) { // Use the HTTP_Request class from the PEAR project.
   require_once("HTTP/Request.php");
-  class MDB_Request extends HTTP_Request{
-    function __construct($url){
+  class IMDB_Request extends HTTP_Request{
+    function IMDB_Request($url){
       $this->HTTP_Request($url);
       if ( PROXY != ""){
         $this->setProxy(PROXY, PROXY_PORT);
@@ -33,16 +33,16 @@ if ( $PEAR ) { // Use the HTTP_Request class from the PEAR project.
   /** The request class
    *  Here we emulate a browser accessing the IMDB site. You don't need to
    *  call any of its method directly - they are rather used by the IMDB classes.
-   * @package MDBApi
-   * @class MDB_Request
+   * @package Api
+   * @class IMDB_Request
    */
-  class MDB_Request extends BrowserEmulator{
+  class IMDB_Request extends BrowserEmulator{
     var $maxsize = 100000;
     /** Constructor: Initialize the BrowserEmulator
      *  No need to call this.
-     * @constructor MDB_Request
+     * @constructor IMDB_Request
      */
-    function __construct($url){
+    function IMDB_Request($url){
       $this->BrowserEmulator();
       $this->urltoopen = $url;
     }
