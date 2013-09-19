@@ -1253,7 +1253,7 @@
     if (empty($this->crazy_credits)) {
       if (empty($this->page["CrazyCredits"])) $this->openpage("CrazyCredits");
       if ( $this->page["CrazyCredits"] == "cannot open page" ) return array(); // no such page
-      if ( preg_match_all('!<div id="cz.+?>(.+?)</span\s*>\s*<span class="linksoda">!ims',$this->page["CrazyCredits"],$matches) ) {
+      if ( preg_match_all('!<div id="cz.+?>(.+?)<br\s*/>\s*<span class="linksoda">!ims',$this->page["CrazyCredits"],$matches) ) {
         $this->crazy_credits = $matches[1];
       }
     }
@@ -1314,11 +1314,11 @@
     if (empty($this->goofs)) {
       if (empty($this->page["Goofs"])) $this->openpage("Goofs");
       if ($this->page["Goofs"] == "cannot open page") return array(); // no such page
-      if ( @preg_match_all('@<h4 class="li_group">(.+?)(!?&nbsp;)</h4>\s*(.+?)\s*(<h4 class="li_group">|<div id="top_rhs_wrapper")@ims',$this->page["Goofs"],$matches) ) {
+      if ( @preg_match_all('@<h4 class="li_group">(.+?)(!?&nbsp;)</h4>\s*(.+?)\s*(<a name="|<div id="top_rhs_wrapper")@ims',$this->page["Goofs"],$matches) ) {
         $gc = count($matches[1]);
         for ($i=0;$i<$gc;++$i) {
           if ($matches[1][$i]=='Spoilers') continue; // no spoilers, moreover they are differently formatted
-          preg_match_all('!<div id="gf.+?>(.+?)<div!ims',$matches[3][$i],$goofy);
+          preg_match_all('!<div id="gf.+?>(.+?)<br\s*/>\s*<span class="linksoda">!ims',$matches[3][$i],$goofy);
           $ic = count($goofy[0]);
           for ($k=0;$k<$ic;++$k) $this->goofs[] = array("type"=>$matches[1][$i],"content"=>str_replace('href="/','href="http://'.$this->imdbsite.'/',$goofy[1][$k]));
         }
@@ -1339,7 +1339,7 @@
     if ( empty($this->moviequotes) ) {
       if ( $this->page["Quotes"] == "" ) $this->openpage("Quotes");
       if ( $this->page["Quotes"] == "cannot open page" ) return array(); // no such page
-      if (preg_match_all('!class="quote soda (odd|even)"\s*><p>\s*(.*?)\s*</p>\s*<div class=!ims',str_replace("\n"," ",$this->page["Quotes"]),$matches))
+      if (preg_match_all('!class="quote soda (odd|even)"\s*><p>\s*(.*?)\s*</p>\s*<span class="linksoda"!ims',str_replace("\n"," ",$this->page["Quotes"]),$matches))
         foreach ($matches[2] as $match) {
           $this->moviequotes[] = "<p>".str_replace('href="/name/','href="http://'.$this->imdbsite.'/name/',preg_replace('!<span class="linksoda".+?</span>!ims','',$match))."</p>";
         }
@@ -1391,70 +1391,6 @@
 
 
  #===========================================================[ /videosites ]===
- #--------------------------------------------------------[ content helper ]---
- /** Parse segments of external information on "VideoSites"
-  * @method private parse_extcontent
-  * @param string title segment title
-  * @param array res resultset (passed by reference)
-  */
- private function parse_extcontent($title,&$res) {
-   if ( $this->page["VideoSites"] == "" ) $this->openpage("VideoSites");
-   if ( $this->page["VideoSites"] == "cannot open page" ) return array(); // no such page
-   if ( preg_match("!<h4 class=\"li_group\">$title\s*</h4>\s*(.+?)<(h4|div)!ims",$this->page["VideoSites"],$match) ) {
-     if ( preg_match_all('!<li>(.+?)</li>!ims',$match[1],$matches) ) {
-       $mc = count($matches[0]);
-       for ($i=0;$i<$mc;++$i) {
-         if ( preg_match('!<a .*href="(?<url>.+?)".*?>(?<site>.*?) - (?<desc>.*) \((?<type>.*?)\)</a>!',$matches[1][$i],$entry) ) {
-           $res[] = array('site'=>$entry['site'], 'url'=>$entry['url'], 'type'=>$entry['type'], 'desc'=>$entry['desc']);
-         } elseif ( preg_match('!<a .*href="(?<url>.+?)".*?>(?<site>.*?) - (?<desc>.+)</a>!',$matches[1][$i],$entry) ) {
-           $res[] = array('site'=>$entry['site'], 'url'=>$entry['url'], 'type'=>'', 'desc'=>$entry['desc']);
-         } elseif ( preg_match('!<a .*href="(?<url>.+?)".*?>(?<desc>.+)</a>!',$matches[1][$i],$entry) ) {
-           $res[] = array('site'=>'', 'url'=>$entry['url'], 'type'=>'', 'desc'=>$entry['desc']);
-         }
-       }
-     }
-   }
- }
-
- #---------------------------------------------------[ Off-site soundclips ]---
-  /** Get the off-site soundclip URLs
-   * @method soundclipsites
-   * @return array soundclipsites array[0..n] of array(site,url,type,desc)
-   * @see IMDB page /videosites
-   */
-  public function soundclipsites() {
-    if ( empty($this->soundclip_sites) ) {
-      $this->parse_extcontent('Sound Clips',$this->soundclip_sites);
-    }
-    return $this->video_sites;
-  }
-
- #-------------------------------------------------------[ Off-site photos ]---
-  /** Get the off-site photo URLs
-   * @method photosites
-   * @return array photosites array[0..n] of array(site,url,type,desc)
-   * @see IMDB page /videosites
-   */
-  public function photosites() {
-    if ( empty($this->photo_sites) ) {
-      $this->parse_extcontent('Photographs',$this->photo_sites);
-    }
-    return $this->photo_sites;
-  }
-
- #--------------------------------------------------[ Off-site miscellanea ]---
-  /** Get the off-site misc URLs
-   * @method miscsites
-   * @return array miscsites array[0..n] of array(site,url,type,desc)
-   * @see IMDB page /videosites
-   */
-  public function miscsites() {
-    if ( empty($this->misc_sites) ) {
-      $this->parse_extcontent('Miscellaneous Sites',$this->misc_sites);
-    }
-    return $this->misc_sites;
-  }
-
  #------------------------------------------[ Off-site trailers and videos ]---
   /** Get the off-site videos and trailer URLs
    * @method videosites
@@ -1463,7 +1399,16 @@
    */
   public function videosites() {
     if ( empty($this->video_sites) ) {
-      $this->parse_extcontent('Video Clips and Trailers',$this->video_sites);
+      if ( $this->page["VideoSites"] == "" ) $this->openpage("VideoSites");
+      if ( $this->page["VideoSites"] == "cannot open page" ) return array(); // no such page
+      if ( preg_match('|<h3[^>]*>\s*Trailers on Other Sites\s*</h3>(.*?)<hr|ims',$this->page["VideoSites"],$match) ) {
+        preg_match_all('!<p[^>]*>(.*?)\s*\((.*?)\)\s*\(<a href="(.*?)">(.*?)</a>\)\s*</p!ims',$match[1],$matches);
+        for ($i=0;$i<count($matches[0]);++$i) {
+          $type = $matches[2][$i];
+          if ( $pos=strrpos($type,'(') ) $type = substr($type,$pos+1);
+          $this->video_sites[] = array("site"=>$matches[4][$i],"url"=>$matches[3][$i],"type"=>$type,"desc"=>$matches[1][$i]);
+        }
+      }
     }
     return $this->video_sites;
   }
@@ -1482,19 +1427,18 @@
       if (empty($this->page["Trivia"])) $this->openpage("Trivia");
       if ($this->page["Trivia"] == "cannot open page") return array(); // no such page
       if ($spoil) {
-        preg_match('!<a id="spoilers"(.+?)\s*<div class="article!ims',$this->page["Trivia"],$block);
+        preg_match('!<a name="spoilers"(.+?)\s*<div id="sidebar">!ims',$this->page["Trivia"],$block);
       } else {
-        preg_match('!<div id="trivia_content"(.+?)<a id="spoilers"!ims',$this->page["Trivia"],$block);
+        preg_match('!<div id="trivia_content"(.+?)<a name="spoilers"!ims',$this->page["Trivia"],$block);
         if (empty($block)) preg_match('!<div id="trivia_content"(.+?)<div id="sidebar">!ims',$this->page["Trivia"],$block);
       }
-      if ( preg_match_all('!<div class="sodatext">\s*(.*?)\s*</div>\s*<div!ims',$block[1],$matches) ) {
+      if ( preg_match_all('!<div class="sodatext">\s*(.*?)\s*<br\s*/>\s*</div>!ims',$block[1],$matches) ) {
         $gc = count($matches[1]);
         for ($i=0;$i<$gc;++$i) $this->trivia[] = str_replace('href="/','href="http://'.$this->imdbsite."/",$matches[1][$i]);
       }
     }
     return $this->trivia;
   }
-
 
  #======================================================[ /soundtrack page ]===
  #------------------------------------------------------[ Soundtrack Array ]---
@@ -1825,13 +1769,18 @@
    * @method officialSites
    * @return array [0..n] of url, name
    * @see IMDB page /officialsites
-   * @brief now combined with /videosites to /externalsites
    */
   public function officialSites() {
     if (empty($this->official_sites)) {
-      $sites = array();
-      $this->parse_extcontent('Official Sites',$sites);
-      foreach ($sites as $site) $this->official_sites[] = array('url'=>$site['url'],'name'=>$site['desc']);
+      if (empty($this->page["OfficialSites"])) $this->openpage("OfficialSites");
+      if ($this->page["OfficialSites"] == "cannot open page") return array(); // no such page
+      preg_match('|official sites for(.*?)related links|ims',$this->page["OfficialSites"],$match);
+      if (preg_match_all('|<li><a href="(.*?)">(.*?)</a></li>|ims',$match[1],$matches)) {
+        $mc = count($matches[0]);
+        for ($i=0;$i<$mc;++$i) {
+          $this->official_sites[] = array("url"=>$matches[1][$i],"name"=>$matches[2][$i]);
+        }
+      }
     }
     return $this->official_sites;
   }

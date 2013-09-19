@@ -95,7 +95,7 @@
   public function photo($thumb=true) {
     if (empty($this->main_photo)) {
       if ($this->page["Name"] == "") $this->openpage ("Name","person");
-       if (preg_match('!<td.*?id="img_primary".*?>*.*?<img.*?src="(.*?)"!ims',$this->page["Name"],$match)) {
+      if (preg_match('!<td id="img_primary".*?>\s*.*?<img.*?src="(.*?)"!ims',$this->page["Name"],$match)) {
         if ($thumb) $this->main_photo = $match[1];
         else        $this->main_photo = str_replace('_SY140_SX100', '_SY600_SX400',$match[1]);
       } else {
@@ -177,7 +177,7 @@
    */
   private function filmograf(&$res,$type) {
     if ($this->page["Name"] == "") $this->openpage ("Name","person");
-    preg_match("!<a name=\"$type\"(.*?(<div id=\"filmo|<script))!msi",$this->page["Name"],$match);
+    preg_match("!<a name=\"$type\"(.*?)<div (id|class)=\">!msi",$this->page["Name"],$match);
     if (empty($type)) $match[1] = $this->page["Name"];
     elseif (empty($match[1])) {
       $pos   = strpos($this->page['Name'],'<a name="'.ucfirst($type).'"');
@@ -192,9 +192,9 @@
       $year = '';
       for ($i=0;$i<$mc;++$i) {
         $char = array();
-        if (preg_match('!<span class="year_column">[^<]*(\d{4})(.*?)</span>!ims',$matches[1][$i],$ty)) $year = $ty[1];
-        preg_match('!href="/title/tt(\d{7})/[^"]*"\s*>(.*?)</a>\s*</b>(.*?)<br!ims',$matches[1][$i],$mov);
-        if ( preg_match('!href="/character/ch(\d{7})[^"]*"\s*>(.*?)</a>!ims',$matches[1][$i],$char) ) {
+        if (preg_match('!<span class="year_column">(\d{4})(.*?)</span>!ims',$matches[1][$i],$ty)) $year = $ty[1];
+        preg_match('!href="/title/tt(\d{7})/"\s*>(.*?)</a>\s*</b>(.*?)<br!ims',$matches[1][$i],$mov);
+        if ( preg_match('!href="/character/ch(\d{7})"\s*>(.*?)</a>!ims',$matches[1][$i],$char) ) {
           $chid   = $char[1];
           $chname = $char[2];
         } else {
@@ -291,7 +291,7 @@
    * @see IMDB person page / (Main page)
    */
   public function movies_crew() {
-    if (empty($this->crewsfilms)) $this->filmograf($this->crewsfilms,"miscellaneous");
+    if (empty($this->crewsfilms)) $this->filmograf($this->crewsfilms,"MiscellaneousCrew");
     return $this->crewsfilms;
   }
 
@@ -334,7 +334,7 @@
    * @see IMDB person page / (Main page)
    */
   public function movies_archive() {
-    if (empty($this->archivefilms)) $this->filmograf($this->archivefilms,"archive_footage");
+    if (empty($this->archivefilms)) $this->filmograf($this->archivefilms,"ArchiveFootage");
     return $this->archivefilms;
   }
 

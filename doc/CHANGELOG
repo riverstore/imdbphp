@@ -3,16 +3,11 @@ $Id$
 History for IMDBPHP2
 ====================
 
-v2.1.9 (19.09.2013)
+v2.1.9
 -------------------
 ! imdb::alsoknow() and imdb::releaseInfo() were broken due to site changes
 ! imdbperson::filmograf() missed some character names due to site changes
 ! imdb::soundtrack() was broken due to site changes
-! imdb_person: latest site changes broke all filmografies. fixed.
-! imdb: crazy_credits(), goofs(), quotes(), video_sites() broken due to site changes
-+ while fixing imdb::video_sites, discovered more similar content on that page: soundclip_sites(), photo_sites() and misc_sites() added
-! imdb: trivia(), officialSites() broken due to site changes
-! imdb_person: movies_crew() and movies_archive() broken due to site changes
 
 v2.1.8 (26.05.2013)
 -------------------
